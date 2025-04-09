@@ -1,0 +1,73 @@
+﻿@page
+@model EasyTesting.Web.Pages.Questions.IndexModel
+@{
+    ViewData["Title"] = "Questions";
+}
+
+<h2>Questions</h2>
+
+<div>
+    <label for="subjectFilter">Filter by Subject:</label>
+    <select id="subjectFilter" class="form-select">
+        <option value="">-- All Subjects --</option>
+        @foreach (var subject in Model.Subjects)
+        {
+            <option value="@subject.Id">@subject.Name</option>
+        }
+    </select>
+</div>
+
+<button onclick="location.href='/Questions/Create'" class="btn btn-primary my-3">Add New Question</button>
+
+<div id="questionsContainer">
+    @foreach (var question in Model.Questions)
+    {
+        <div class="card my-2 p-3">
+            <h5>@question.Text</h5>
+            <strong>Subject:</strong> @question.Subject
+            <ul>
+                @foreach (var option in question.AnswerOptions)
+                {
+                    <li>@option.OptionText (@(option.IsCorrect ? "Correct" : "Wrong"))</li>
+                }
+            </ul>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("subjectFilter").addEventListener("change", async function () {
+            const subjectId = this.value;
+            const container = document.getElementById("questionsContainer");
+
+            const response = await fetch(subjectId
+                ? `/api/v1/questions/subject/${subjectId}`
+                : `/api/v1/questions`);
+
+            if (response.ok) {
+                const questions = await response.json();
+                container.innerHTML = "";
+
+                for (const q of questions) {
+                    const card = document.createElement("div");
+                    card.classList.add("card", "my-2", "p-3");
+
+                    card.innerHTML = `
+                                <h5>${q.text}</h5>
+                                <strong>Subject:</strong> ${q.subject}
+                                <ul>
+                                    ${q.answerOptions.map(opt =>
+                        `<li>${opt.optionText} (${opt.isCorrect ? "Correct" : "Wrong"})</li>`
+                    ).join("")}
+                                </ul>
+                            `;
+
+                    container.appendChild(card);
+                }
+            } else {
+                alert("Failed to load questions.");
+            }
+        });
+    </script>
+}
