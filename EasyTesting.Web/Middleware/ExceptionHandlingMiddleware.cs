@@ -1,6 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
-
-namespace UserService.Middleware
+﻿namespace EasyTesting.Web.Middleware
 {
     public class ExceptionHandlingMiddleware
     {

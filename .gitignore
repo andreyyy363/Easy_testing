@@ -53,3 +53,5 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 /.vs
+/EasyTesting.Web/Migrations
+/EasyTesting.Web/.vs/EasyTesting.Web
