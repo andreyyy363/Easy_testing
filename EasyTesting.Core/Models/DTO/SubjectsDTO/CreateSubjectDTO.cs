@@ -22,7 +22,7 @@ namespace EasyTesting.Core.Models.DTO
         /// <summary>
         /// The identifier of the teacher creating the subject.
         /// </summary>
-        [Required(ErrorMessage = "Teacher ID is required.")]
-        public required string TeacherId { get; set; }
+        // [Required(ErrorMessage = "Teacher ID is required.")]
+        public int TeacherId { get; set; }
     }
 }

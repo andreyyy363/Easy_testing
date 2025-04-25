@@ -10,7 +10,7 @@ namespace EasyTesting.Core.Models.DTO
     /// <summary>
     /// Data Transfer Object used to update an existing question.
     /// </summary>
-    public class UpdateQuestionDto
+    public class UpdateQuestionDTO
     {
         /// <summary>
         /// Updated text of the question.
@@ -21,6 +21,6 @@ namespace EasyTesting.Core.Models.DTO
         /// <summary>
         /// Updated list of answer options for the question.
         /// </summary>
-        public List<AnswerOptionDto>? AnswerOptions { get; set; }
+        public List<AnswerOptionDTO>? AnswerOptions { get; set; }
     }
 }

@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.UI;
-using Serilog;
-using EasyTesting.Core.Data;
-using Microsoft.EntityFrameworkCore;
+﻿using EasyTesting.Core.Data;
 using EasyTesting.Core.Service;
 using EasyTesting.Web.Middleware;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 Log.Logger = new LoggerConfiguration()
@@ -17,44 +17,72 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-//builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-//    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!);
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                if (string.IsNullOrEmpty(context.Token))
+                {
+                    context.Request.Cookies.TryGetValue("AuthToken", out var token);
+                    context.Token = token;
+                }
+                return Task.CompletedTask;
+            }
+        };
 
-//builder.Services.AddAuthorization(options =>
-//{
-//    options.FallbackPolicy = options.DefaultPolicy;
-//});
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Issuer"],
+            IssuerSigningKey = new SymmetricSecurityKey(key)
+        };
+    });
 
-//builder.Services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
-//{
-//    options.Events = new OpenIdConnectEvents
-//    {
-
-//        OnTokenValidated = async context =>
-//        {
-//            var httpContext = context.HttpContext;
-//            httpContext.Response.Redirect("/");
-//            context.HandleResponse();
-//        },
-
-//        OnRemoteFailure = context =>
-//        {
-//            context.Response.Redirect("/AccessDenied");
-//            context.HandleResponse();
-//            return Task.CompletedTask;
-//        }
-//    };
-//});
+builder.Services.AddAuthorization();
 
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "User Service API",
+        Title = "Easy Testing API",
         Version = "v1",
-        Description = "User Service API"
+        Description = "Easy Testing API"
     });
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "EasyTestingApi.xml"));
+    #region AddSecurityDefinition if returning token
+
+    /*options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please insert JWT with Bearer into field",
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] { }
+        }
+    });*/
+
+    #endregion
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -63,10 +91,17 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<ISubjectService, SubjectService>();
+builder.Services.AddScoped<ITestService, TestService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
+builder.Services.AddScoped<ITestGenerator, XmlTestGenerator>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
+builder.Services.AddScoped<ITestRepository, TestRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<TokenService>();
 
-builder.Services.AddControllersWithViews().AddMicrosoftIdentityUI();
+builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient("ApiClient", client =>
 {
     client.BaseAddress = new Uri("https://localhost:7067");
@@ -75,20 +110,13 @@ builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var dbContext = services.GetRequiredService<AppDbContext>();
-    dbContext.Database.Migrate();
-}
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "UserService API V1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "EasyTesting API V1");
         c.RoutePrefix = "swagger";
     });
 }
@@ -97,18 +125,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-//app.UseAuthentication();
-//app.UseAuthorization();
-
-//app.Use(async (context, next) =>
-//{
-//    if (!context.User.Identity.IsAuthenticated)
-//    {
-//        context.Response.Redirect("/MicrosoftIdentity/Account/SignIn");
-//        return;
-//    }
-//    await next();
-//});
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSerilogRequestLogging();
@@ -123,4 +141,3 @@ finally
 {
     Log.CloseAndFlush();
 }
-

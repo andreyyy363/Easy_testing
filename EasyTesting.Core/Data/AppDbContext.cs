@@ -1,4 +1,4 @@
-﻿using EasyTesting.Core.Models;
+﻿using EasyTesting.Core.Data.Configurations;
 using EasyTesting.Core.Models.Entity;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,22 +9,19 @@ namespace EasyTesting.Core.Data
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<AnswerOption> AnswerOptions { get; set; }
+        public DbSet<Test> Tests { get; set; }
+        public DbSet<User> Users { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<AnswerOption>()
-                .HasOne(a => a.Question)
-                .WithMany(q => q.AnswerOptions)
-                .HasForeignKey(a => a.QuestionId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<Question>()
-                .HasOne(q => q.Subject)
-                .WithMany(s => s.Questions)
-                .HasForeignKey(q => q.SubjectId);
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
+            modelBuilder.ApplyConfiguration(new SubjectConfiguration());
+            modelBuilder.ApplyConfiguration(new TestConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestionConfiguration());
+            modelBuilder.ApplyConfiguration(new AnswerOptionConfiguration());
         }
     }
 }

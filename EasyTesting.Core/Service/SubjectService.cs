@@ -1,10 +1,5 @@
 ﻿using EasyTesting.Core.Data;
 using EasyTesting.Core.Models.Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EasyTesting.Core.Service
 {
@@ -21,19 +16,19 @@ namespace EasyTesting.Core.Service
             await _subjectRepository.AddSubjectAsync(subject);
         }
 
-        public Task<Subject?> FindSubjectByIdAsync(int id)
+        public Task<Subject?> FindSubjectByIdAsync(int teacherId, int id)
         {
-            return _subjectRepository.FindSubjectByIdAsync(id);
+            return _subjectRepository.FindSubjectByIdAsync(teacherId, id);
         }
 
-        public Task<IEnumerable<Subject>> GetAllSubjectsAsync()
+        public Task<IEnumerable<Subject>> GetAllSubjectsAsync(int teacherId)
         {
-            return _subjectRepository.GetAllSubjectsAsync();
+            return _subjectRepository.GetAllSubjectsAsync(teacherId);
         }
 
-        public async Task DeleteSubjectAsync(int id)
+        public async Task DeleteSubjectAsync(int teacherId, int id)
         {
-            await _subjectRepository.DeleteSubjectAsync(id);
+            await _subjectRepository.DeleteSubjectAsync(teacherId, id);
         }
     }
 }

@@ -11,8 +11,14 @@ namespace EasyTesting.Core.Models.DTO
     /// <summary>
     /// Data Transfer Object for representing an answer option in a question.
     /// </summary>
-    public class AnswerOptionDto
+    public class AnswerOptionDTO
     {
+        /// <summary>
+        /// Unique identifier of the answer option.
+        /// </summary>
+        [Required(ErrorMessage = "Option ID is required.")]
+        public int Id { get; set; }
+
         /// <summary>
         /// The text of the answer option.
         /// </summary>
@@ -31,12 +37,13 @@ namespace EasyTesting.Core.Models.DTO
         /// </summary>
         /// <param name="answerOption">The AnswerOption entity to convert.</param>
         /// <returns>The corresponding AnswerOptionDto.</returns>
-        public static AnswerOptionDto toDTO(AnswerOption answerOption)
+        public static AnswerOptionDTO toDTO(AnswerOption answerOption)
         {
-            return new AnswerOptionDto
+            return new AnswerOptionDTO
             {
                 OptionText = answerOption.Text,
-                IsCorrect = answerOption.IsCorrect
+                IsCorrect = answerOption.IsCorrect,
+                Id = answerOption.Id
             };
         }
     }

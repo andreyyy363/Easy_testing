@@ -17,29 +17,30 @@ namespace EasyTesting.Core.Service
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<IEnumerable<Question>> GetAllQuestionsAsync()
+        public async Task<IEnumerable<Question>> GetAllQuestionsAsync(int teacherId)
         {
-            return await _questionRepository.GetAllQuestionsAsync();
+            return await _questionRepository.GetAllQuestionsAsync(teacherId);
         }
 
-        public async Task<Question?> FindQuestionByIdAsync(int id)
+        public async Task<Question?> FindQuestionByIdAsync(int teacherId, int id)
         {
-            return await _questionRepository.FindQuestionByIdAsync(id);
+            return await _questionRepository.FindQuestionByIdAsync(teacherId, id);
         }
 
-        public async Task<IEnumerable<Question>> GetQuestionsBySubjectIdAsync(int subjectId)
+        public async Task<IEnumerable<Question>> GetQuestionsBySubjectIdAsync(int teacherId, int subjectId)
         {
-            return await _questionRepository.GetQuestionsBySubjectIdAsync(subjectId);
+            return await _questionRepository.GetQuestionsBySubjectIdAsync(teacherId, subjectId);
         }
 
-        public async Task AddQuestionAsync(CreateQuestionDto createQuestionDto)
+        public async Task AddQuestionAsync(int teacherId, CreateQuestionDTO createQuestionDto)
         {
+            createQuestionDto.TeacherId = teacherId;
             await _questionRepository.AddQuestionAsync(createQuestionDto.fromDTO());
         }
 
-        public async Task<Question> UpdateQuestionAsync(int id, UpdateQuestionDto updateQuestionDto)
+        public async Task<Question> UpdateQuestionAsync(int teacherId, int id, UpdateQuestionDTO updateQuestionDto)
         {
-            var question = await _questionRepository.FindQuestionByIdAsync(id);
+            var question = await _questionRepository.FindQuestionByIdAsync(teacherId, id);
             if (question == null)
             {
                 _logger.LogError($"Question {id} was not found.");
@@ -58,9 +59,9 @@ namespace EasyTesting.Core.Service
             return await _questionRepository.UpdateQuestionAsync(question);
         }
 
-        public async Task DeleteQuestionAsync(int id)
+        public async Task DeleteQuestionAsync(int teacherId, int id)
         {
-            await _questionRepository.DeleteQuestionAsync(id);
+            await _questionRepository.DeleteQuestionAsync(teacherId, id);
         }
     }
 }
