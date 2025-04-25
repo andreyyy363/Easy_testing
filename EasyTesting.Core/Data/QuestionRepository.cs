@@ -1,5 +1,6 @@
 ﻿using EasyTesting.Core.Models.Entity;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Quic;
 
 namespace EasyTesting.Core.Data
 {
@@ -18,21 +19,24 @@ namespace EasyTesting.Core.Data
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Question?> FindQuestionByIdAsync(int id)
+        public async Task<Question?> FindQuestionByIdAsync(int teacherId, int id)
         {
             return await _context.Questions.Include(q => q.Subject).Include(q => q.AnswerOptions)
-                                           .FirstOrDefaultAsync(q => q.Id == id);
+                                           .FirstOrDefaultAsync(q => q.Id == id && q.CreatedById == teacherId);
         }
 
-        public async Task<IEnumerable<Question>> GetQuestionsBySubjectIdAsync(int subjectId)
+        public async Task<IEnumerable<Question>> GetQuestionsBySubjectIdAsync(int teacherId, int subjectId)
         {
             return await _context.Questions.Include(q => q.Subject).Include(q => q.AnswerOptions)
-                                            .Where(q => q.SubjectId == subjectId).ToListAsync();
+                                           .Where(q => q.SubjectId == subjectId && q.CreatedById == teacherId)
+                                           .ToListAsync();
         }
 
-        public async Task<IEnumerable<Question>> GetAllQuestionsAsync()
+        public async Task<IEnumerable<Question>> GetAllQuestionsAsync(int teacherId)
         {
-            return await _context.Questions.Include(q => q.Subject).Include(q => q.AnswerOptions).ToListAsync();
+            return await _context.Questions.Include(q => q.Subject).Include(q => q.AnswerOptions)
+                                           .Where(q => q.CreatedById == teacherId)
+                                           .ToListAsync();
         }
 
         public async Task<Question> UpdateQuestionAsync(Question question)
@@ -42,15 +46,16 @@ namespace EasyTesting.Core.Data
             return question;
         }
 
-        public async Task DeleteQuestionAsync(int id)
+        public async Task DeleteQuestionAsync(int teacherId, int id)
         {
-            var question = await _context.Questions.FindAsync(id);
-            if (question != null)
+            var question = await _context.Questions.FirstOrDefaultAsync(q => q.Id == id && q.CreatedById == teacherId);
+            
+            if (question == null || question.TestId != null)
             {
-                _context.Questions.Remove(question);
-                await _context.SaveChangesAsync();
+                throw new ArgumentException("Question can not be deleted. Either not found or used in a test.");
             }
+            _context.Questions.Remove(question);
+            await _context.SaveChangesAsync();
         }
-
     }
 }

@@ -11,7 +11,7 @@ namespace EasyTesting.Core.Models.DTO
     /// <summary>
     /// Data Transfer Object representing a subject.
     /// </summary>
-    public class SubjectDto
+    public class SubjectDTO
     {
         /// <summary>
         /// Unique identifier of the subject.
@@ -28,16 +28,17 @@ namespace EasyTesting.Core.Models.DTO
         /// <summary>
         /// Identifier of the teacher who owns the subject.
         /// </summary>
-        public string TeacherId { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Teacher ID is required.")]
+        public int TeacherId { get; set; } 
 
         /// <summary>
         /// Maps a Subject entity to a SubjectDto.
         /// </summary>
         /// <param name="subject">The Subject entity.</param>
         /// <returns>The corresponding SubjectDto.</returns>
-        public static SubjectDto toDTO(Subject subject)
+        public static SubjectDTO toDTO(Subject subject)
         {
-            return new SubjectDto
+            return new SubjectDTO
             {
                 Id = subject.Id,
                 Name = subject.Name,

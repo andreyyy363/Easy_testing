@@ -9,9 +9,9 @@ namespace EasyTesting.Core.Data
 {
     public interface ISubjectRepository
     {
-        Task<IEnumerable<Subject>> GetAllSubjectsAsync();
-        Task<Subject?> FindSubjectByIdAsync(int id);
+        Task<IEnumerable<Subject>> GetAllSubjectsAsync(int teacherId);
+        Task<Subject?> FindSubjectByIdAsync(int teacherId, int id);
         Task AddSubjectAsync(Subject subject);
-        Task DeleteSubjectAsync(int id);
+        Task DeleteSubjectAsync(int teacherId, int id);
     }
 }

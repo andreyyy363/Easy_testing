@@ -7,9 +7,10 @@ namespace EasyTesting.Web.Pages.Questions
 {
     public class CreateModel : PageModel
     {
-        public List<SubjectDto> Subjects { get; set; } = new();
+        public List<SubjectDTO> Subjects { get; set; } = new();
+
         [BindProperty]
-        public required CreateQuestionDto NewQuestion { get; set; }
+        public required CreateQuestionDTO NewQuestion { get; set; }
 
         private readonly IHttpClientFactory _httpClientFactory;
 
@@ -21,7 +22,7 @@ namespace EasyTesting.Web.Pages.Questions
         public async Task OnGetAsync()
         {
             var client = _httpClientFactory.CreateClient("ApiClient");
-            Subjects = await client.GetFromJsonAsync<List<SubjectDto>>("api/v1/subjects") ?? new();
+            Subjects = await client.GetFromJsonAsync<List<SubjectDTO>>("api/v1/subjects") ?? new();
         }
     }
 }

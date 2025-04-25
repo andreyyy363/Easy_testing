@@ -11,7 +11,7 @@ namespace EasyTesting.Core.Models.DTO
     /// <summary>
     /// Data Transfer Object for returning question details.
     /// </summary>
-    public class QuestionDto
+    public class QuestionDTO
     {
         /// <summary>
         /// The unique identifier of the question.
@@ -36,26 +36,33 @@ namespace EasyTesting.Core.Models.DTO
         public required int SubjectId { get; set; }
 
         /// <summary>
+        /// ID of the Teacher, who created the question.
+        /// </summary>
+        [Required(ErrorMessage = "Teacher ID is required.")]
+        public int TeacherId { get; set; }
+
+        /// <summary>
         /// The list of answer options associated with the question.
         /// </summary>
         [Required(ErrorMessage = "Answer options must be provided.")]
         [MinLength(2, ErrorMessage = "At least two answer options are required.")]
-        public required List<AnswerOptionDto> AnswerOptions { get; set; }
+        public required List<AnswerOptionDTO> AnswerOptions { get; set; }
 
         /// <summary>
         /// Maps a Question entity to a QuestionDto.
         /// </summary>
         /// <param name="question">The Question entity.</param>
         /// <returns>The corresponding QuestionDto.</returns>
-        public static QuestionDto toDTO(Question question)
+        public static QuestionDTO toDTO(Question question)
         {
-            return new QuestionDto
+            return new QuestionDTO
             {
                 Id = question.Id,
                 Text = question.Text,
                 Subject = question.Subject?.Name ?? string.Empty,
                 SubjectId = question.SubjectId,
-                AnswerOptions = question.AnswerOptions.Select(AnswerOptionDto.toDTO).ToList()
+                TeacherId = question.CreatedById,
+                AnswerOptions = question.AnswerOptions.Select(AnswerOptionDTO.toDTO).ToList()
             };
         }
     }

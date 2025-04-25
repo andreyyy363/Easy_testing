@@ -11,7 +11,7 @@ namespace EasyTesting.Core.Models.DTO
     /// <summary>
     /// Data Transfer Object for creating a new question.
     /// </summary>
-    public class CreateQuestionDto
+    public class CreateQuestionDTO
     {
         /// <summary>
         /// The text of the question.
@@ -27,11 +27,16 @@ namespace EasyTesting.Core.Models.DTO
         public int SubjectId { get; set; }
 
         /// <summary>
+        /// ID of the Teacher, who created the question.
+        /// </summary>
+        public int TeacherId { get; set; }
+
+        /// <summary>
         /// The list of possible answer options for the question.
         /// </summary>
         [Required(ErrorMessage = "At least one answer option is required.")]
         [MinLength(2, ErrorMessage = "A question must have at least two answer options.")]
-        public required List<AnswerOptionDto> AnswerOptions { get; set; }
+        public required List<AnswerOptionDTO> AnswerOptions { get; set; }
 
         /// <summary>
         /// Converts the DTO to a Question entity.
@@ -43,6 +48,7 @@ namespace EasyTesting.Core.Models.DTO
             {
                 Text = this.Text,
                 SubjectId = this.SubjectId,
+                CreatedById = this.TeacherId,
                 AnswerOptions = AnswerOptions.Select(a => new AnswerOption
                 {
                     Text = a.OptionText,

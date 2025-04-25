@@ -23,19 +23,19 @@ namespace EasyTesting.Core.Data
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Subject?> FindSubjectByIdAsync(int id)
+        public async Task<Subject?> FindSubjectByIdAsync(int teacherId, int id)
         {
-            return await _context.Subjects.FindAsync(id);
+            return await _context.Subjects.FirstOrDefaultAsync(s => s.Id == id && s.TeacherId == teacherId);
         }
 
-        public async Task<IEnumerable<Subject>> GetAllSubjectsAsync()
+        public async Task<IEnumerable<Subject>> GetAllSubjectsAsync(int teacherId)
         {
-            return await _context.Subjects.ToListAsync();
+            return await _context.Subjects.Where(s => s.TeacherId == teacherId).ToListAsync();
         }
 
-        public async Task DeleteSubjectAsync(int id)
+        public async Task DeleteSubjectAsync(int teacherId, int id)
         {
-            var subject = await _context.Subjects.FindAsync(id);
+            var subject = await _context.Subjects.FirstOrDefaultAsync(s => s.Id == id && s.TeacherId == teacherId);
             if (subject != null)
             {
                 _context.Subjects.Remove(subject);
