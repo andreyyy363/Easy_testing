@@ -12,20 +12,20 @@ namespace EasyTesting.Web.Controllers
     [ApiController]
     [Route("api/v1/subjects")]
     [Authorize]
-    public class SubjectController : ControllerBase
+    public class SubjectController : BaseApiController
     {
         private readonly ISubjectService _subjectService;
-        private readonly TokenService _tokenGenerator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubjectController"/> class.
         /// </summary>
         /// <param name="subjectService">Service for handling subject operations.</param>
-        /// <param name="tokenGenerator">Service for handling token operations.</param>
-        public SubjectController(ISubjectService subjectService, TokenService tokenGenerator)
+        /// <param name="tokenService">Service for handling token operations.</param>
+        public SubjectController(ISubjectService subjectService, TokenService tokenService)
+        : base(tokenService)
         {
             _subjectService = subjectService;
-            _tokenGenerator = tokenGenerator;
+
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace EasyTesting.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllSubjects()
         {
-            var teacherId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 
@@ -62,7 +62,7 @@ namespace EasyTesting.Web.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSubject(int id)
         {
-            var teacherId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 
@@ -78,7 +78,7 @@ namespace EasyTesting.Web.Controllers
         /// <summary>
         /// Adds a new subject for the currently authenticated teacher.
         /// </summary>
-        /// <param name="subjectDto">The DTO containing the subject's name.</param>
+        /// <param name="subjectDTO">The DTO containing the subject's name.</param>
         /// <returns>
         /// 204 No Content if the subject was successfully added,  
         /// or 401 Unauthorized if not authenticated.
@@ -87,14 +87,13 @@ namespace EasyTesting.Web.Controllers
         /// <response code="401">If the user is not authenticated.</response>
         [Authorize(Roles = "Teacher")]
         [HttpPost]
-        public async Task<IActionResult> AddSubject([FromBody] CreateSubjectDTO subjectDto)
+        public async Task<IActionResult> AddSubject([FromBody] CreateSubjectDTO subjectDTO)
         {
-            var teacherId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 
-            var subject = new Subject { Name = subjectDto.Name, TeacherId = teacherId.Value };
-            await _subjectService.AddSubjectAsync(subject);
+            await _subjectService.AddSubjectAsync(teacherId.Value, subjectDTO);
             return NoContent();
         }
 
@@ -112,7 +111,7 @@ namespace EasyTesting.Web.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSubject(int id)
         {
-            var teacherId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 

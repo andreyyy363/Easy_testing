@@ -25,11 +25,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnMessageReceived = context =>
             {
-                if (string.IsNullOrEmpty(context.Token))
-                {
-                    context.Request.Cookies.TryGetValue("AuthToken", out var token);
-                    context.Token = token;
-                }
+                var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+                context.Token = token;
                 return Task.CompletedTask;
             }
         };
@@ -47,6 +44,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -59,12 +57,13 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "EasyTestingApi.xml"));
     #region AddSecurityDefinition if returning token
 
-    /*options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        In = ParameterLocation.Header,
-        Description = "Please insert JWT with Bearer into field",
+        Description = "Enter **'Bearer'** followed by a space and your JWT token.\n\nExample: `Bearer eyJhbGciOi...`",
         Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -80,7 +79,7 @@ builder.Services.AddSwaggerGen(options =>
             },
             new string[] { }
         }
-    });*/
+    });
 
     #endregion
 });
@@ -102,11 +101,17 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<TokenService>();
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddHttpClient("ApiClient", client =>
+builder.Services.AddCors(options =>
 {
-    client.BaseAddress = new Uri("https://localhost:7067");
+    options.AddPolicy("AllowFrontend",
+        policy => policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+    );
 });
-builder.Services.AddRazorPages();
+//builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
@@ -121,6 +126,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
@@ -130,8 +136,14 @@ app.UseAuthorization();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSerilogRequestLogging();
+
+//app.MapFallbackToPage("/Login");
+
 app.MapControllers();
-app.MapRazorPages();
+//app.MapRazorPages();
+
+// Catch-all route to serve the React app for all other routes
+app.MapFallbackToFile("index.html");
 
 try
 {

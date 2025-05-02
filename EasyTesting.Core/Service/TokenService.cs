@@ -11,7 +11,7 @@ namespace EasyTesting.Core.Service
 {
     public class TokenService
     {
-        public const string AuthTokenKey = "AuthToken";
+        public const string Bearer = "Bearer";
         private const string TeacherIdClaim = "TeacherId";
         private readonly IConfiguration _config;
 
@@ -47,31 +47,25 @@ namespace EasyTesting.Core.Service
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public int? GetUserIdFromToken(HttpRequest request)
+        public int? GetUserIdFromToken(ClaimsPrincipal user)
         {
-            if (!request.Cookies.TryGetValue(AuthTokenKey, out var token))
+            if (user.Claims == null)
                 return null;
 
-            return GetIdFromTokenByClaimType(token, ClaimTypes.NameIdentifier);
+            return GetIdByClaimType(user, ClaimTypes.NameIdentifier);
         }
 
-        public int? GetTeacherIdFromToken(HttpRequest request)
+        public int? GetTeacherIdFromToken(ClaimsPrincipal user)
         {
-            if (!request.Cookies.TryGetValue(AuthTokenKey, out var token))
+            if (user.Claims == null)
                 return null;
 
-            return GetIdFromTokenByClaimType(token, TeacherIdClaim);
+            return GetIdByClaimType(user, TeacherIdClaim);
         }
 
-        private int? GetIdFromTokenByClaimType(string token, string claimType)
+        private int? GetIdByClaimType(ClaimsPrincipal user, string claimType)
         {
-            if (string.IsNullOrEmpty(token))
-                return null;
-
-            var handler = new JwtSecurityTokenHandler();
-            var jwt = handler.ReadJwtToken(token);
-            var idClaim = jwt.Claims.FirstOrDefault(c => c.Type == claimType);
-
+            var idClaim = user.FindFirst(claimType);
             return idClaim != null ? int.Parse(idClaim.Value) : null;
         }
     }

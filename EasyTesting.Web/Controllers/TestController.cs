@@ -11,20 +11,19 @@ namespace EasyTesting.Web.Controllers
     [ApiController]
     [Route("api/v1/tests")]
     [Authorize]
-    public class TestController : ControllerBase
+    public class TestController : BaseApiController
     {
         private readonly ITestService _testService;
-        private readonly TokenService _tokenGenerator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TestController"/> class.
         /// </summary>
         /// <param name="testService">Service for handling test logic.</param>
-        /// <param name="tokenGenerator">Service for handling token operations.</param>
-        public TestController(ITestService testService, TokenService tokenGenerator)
+        /// <param name="tokenService">Service for handling token operations.</param>
+        public TestController(ITestService testService, TokenService tokenService)
+        : base(tokenService)
         {
             _testService = testService;
-            _tokenGenerator = tokenGenerator;
         }
 
         /// <summary>
@@ -36,7 +35,7 @@ namespace EasyTesting.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllTests()
         {
-            var teacherId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 
@@ -56,7 +55,7 @@ namespace EasyTesting.Web.Controllers
         [Obsolete("Use {id}/xml instead")]
         public async Task<IActionResult> GetTest(int id)
         {
-            var teacherId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 
@@ -78,7 +77,7 @@ namespace EasyTesting.Web.Controllers
         [HttpGet("{id}/xml")]
         public async Task<IActionResult> GetTestXml(int id)
         {
-            var teacherId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var teacherId = GetTeacherId();
             if (teacherId == null)
 
                 return Unauthorized();
@@ -99,7 +98,7 @@ namespace EasyTesting.Web.Controllers
         [HttpGet("subject/{id}")]
         public async Task<IActionResult> GetTestsBySubject(int id)
         {
-            var teacherId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 
@@ -115,10 +114,10 @@ namespace EasyTesting.Web.Controllers
         /// <response code="204">If the test is created successfully.</response>
         /// <response code="401">If the user is not authenticated.</response>
         [Authorize(Roles = "Teacher")]
-        [HttpPost("/generate")]
+        [HttpPost("generate")]
         public async Task<IActionResult> GenerateTest([FromBody] CreateTestDTO createTestDTO)
         {
-            var teacherId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 
@@ -134,10 +133,10 @@ namespace EasyTesting.Web.Controllers
         /// <response code="200">If the submission was successful.</response>
         /// <response code="401">If the user is not authenticated.</response>
         /// <response code="400">If the test or question data is invalid.</response>
-        [HttpPost("/submit")]
+        [HttpPost("submit")]
         public async Task<IActionResult> SubmitTest([FromBody] SubmitTestDTO submitTestDTO)
         {
-            var userId = _tokenGenerator.GetUserIdFromToken(Request);
+            var userId = GetUserId();
             if (userId == null)
                 return Unauthorized();
 
@@ -156,7 +155,7 @@ namespace EasyTesting.Web.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTest(int id)
         {
-            var teacherId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 

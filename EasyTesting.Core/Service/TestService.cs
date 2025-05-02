@@ -33,7 +33,7 @@ namespace EasyTesting.Core.Service
                 .Where(q => q.TestId == null)
                 .ToList();
 
-            if (randomQuestions.Count < createTestDTO.QuestionsCount) 
+            if (createTestDTO.QuestionsCount == 0 || randomQuestions.Count < createTestDTO.QuestionsCount) 
             {
                 _logger.LogError($"Not enough questions that will be added to test for selected subject: count {randomQuestions.Count}");
                 throw new ArgumentException($"Not enough questions for selected subject: Count {randomQuestions.Count}");

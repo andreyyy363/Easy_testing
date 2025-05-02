@@ -1,5 +1,6 @@
 ﻿using EasyTesting.Core.Models.DTO;
 using EasyTesting.Core.Service;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EasyTesting.Web.Controllers
@@ -53,22 +54,13 @@ namespace EasyTesting.Web.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromForm] UserLoginDTO userLoginDTO)
         {
-            await _userService.Login(HttpContext, userLoginDTO.Username, userLoginDTO.Password);
-            return Ok(new { Message = "Login successful" });
-        }
-
-        /// <summary>
-        /// Logs out the currently authenticated user.
-        /// </summary>
-        /// <returns>
-        /// 204 No Content if logout is successful.
-        /// </returns>
-        /// <response code="204">Logout was successful.</response>
-        [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
-        {
-            await _userService.Logout(HttpContext);
-            return NoContent();
+            var token = await _userService.Login(HttpContext, userLoginDTO.Username, userLoginDTO.Password);
+            return Ok(new
+            {
+                access_token = token,
+                token_type = TokenService.Bearer,
+                expiration_date = DateTime.UtcNow.AddDays(7).ToString("yyyy-MM-ddTHH:mm:ssZ")
+            });
         }
     }
 }

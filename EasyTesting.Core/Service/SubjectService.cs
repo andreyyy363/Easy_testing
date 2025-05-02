@@ -1,4 +1,5 @@
 ﻿using EasyTesting.Core.Data;
+using EasyTesting.Core.Models.DTO;
 using EasyTesting.Core.Models.Entity;
 
 namespace EasyTesting.Core.Service
@@ -11,8 +12,9 @@ namespace EasyTesting.Core.Service
             _subjectRepository = subjectRepository;
         }
 
-        public async Task AddSubjectAsync(Subject subject)
+        public async Task AddSubjectAsync(int teacherId, CreateSubjectDTO subjectDTO)
         {
+            var subject = new Subject { Name = subjectDTO.Name, TeacherId = teacherId };
             await _subjectRepository.AddSubjectAsync(subject);
         }
 

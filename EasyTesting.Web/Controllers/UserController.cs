@@ -12,20 +12,19 @@ namespace EasyTesting.Web.Controllers
     [ApiController]
     [Route("api/v1/users")]
     [Authorize]
-    public class UserController : ControllerBase
+    public class UserController : BaseApiController
     {
         private readonly IUserService _userService;
-        private readonly TokenService _tokenGenerator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserController"/> class.
         /// </summary>
         /// <param name="userService">Service for user-related operations.</param>
-        /// <param name="tokenGenerator">Service for handling token operations.</param>
-        public UserController(IUserService userService, TokenService tokenGenerator)
+        /// <param name="tokenService">Service for handling token operations.</param>
+        public UserController(IUserService userService, TokenService tokenService)
+        : base(tokenService)
         {
             _userService = userService;
-            _tokenGenerator = tokenGenerator;
         }
 
         /// <summary>
@@ -55,7 +54,7 @@ namespace EasyTesting.Web.Controllers
         [HttpGet("current")]
         public async Task<IActionResult> GetCurrentUser()
         {
-            var userId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var userId = GetUserId();
             if (userId == null)
                 return Unauthorized();
 
@@ -79,7 +78,7 @@ namespace EasyTesting.Web.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateUser([FromForm] UserUpdateDTO userUpdateDTO)
         {
-            var userId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var userId = GetTeacherId();
             if (userId == null)
                 return Unauthorized();
 
@@ -102,7 +101,7 @@ namespace EasyTesting.Web.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteUser()
         {
-            var userId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var userId = GetTeacherId();
             if (userId == null)
                 return Unauthorized();
 
