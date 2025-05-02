@@ -13,20 +13,19 @@ namespace EasyTesting.Web.Controllers
     [ApiController]
     [Route("api/v1/questions")]
     [Authorize(Roles = "Teacher")]
-    public class QuestionController : ControllerBase
+    public class QuestionController : BaseApiController
     {
         private readonly IQuestionService _questionService;
-        private readonly TokenService _tokenGenerator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QuestionController"/> class.
         /// </summary>
         /// <param name="questionService">Service for handling question operations.</param>
-        /// <param name="tokenGenerator">Service for handling token operations.</param>
-        public QuestionController(IQuestionService questionService, TokenService tokenGenerator)
+        /// <param name="tokenService">Service for handling token operations.</param>
+        public QuestionController(IQuestionService questionService, TokenService tokenService)
+        : base(tokenService)
         {
             _questionService = questionService;
-            _tokenGenerator = tokenGenerator;
         }
 
         /// <summary>
@@ -40,7 +39,7 @@ namespace EasyTesting.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllQuestions()
         {
-            var teacherId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 
@@ -61,7 +60,7 @@ namespace EasyTesting.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateQuestion([FromBody] CreateQuestionDTO createQuestionDto)
         {
-            var teacherId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 
@@ -84,7 +83,7 @@ namespace EasyTesting.Web.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetQuestion(int id)
         {
-            var teacherId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 
@@ -110,7 +109,7 @@ namespace EasyTesting.Web.Controllers
         [HttpGet("subject/{id}")]
         public async Task<IActionResult> GetQuestionsBySubject(int id)
         {
-            var teacherId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 
@@ -134,7 +133,7 @@ namespace EasyTesting.Web.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateQuestion(int id, [FromBody] UpdateQuestionDTO updateQuestionDto)
         {
-            var teacherId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 
@@ -160,7 +159,7 @@ namespace EasyTesting.Web.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteQuestion(int id)
         {
-            var teacherId = _tokenGenerator.GetTeacherIdFromToken(Request);
+            var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 

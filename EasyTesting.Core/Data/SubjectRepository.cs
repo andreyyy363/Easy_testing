@@ -36,6 +36,7 @@ namespace EasyTesting.Core.Data
         public async Task DeleteSubjectAsync(int teacherId, int id)
         {
             var subject = await _context.Subjects.FirstOrDefaultAsync(s => s.Id == id && s.TeacherId == teacherId);
+            
             if (subject != null)
             {
                 _context.Subjects.Remove(subject);

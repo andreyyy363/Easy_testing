@@ -30,10 +30,10 @@ namespace EasyTesting.Core.Models.DTO
         /// The name of the subject the question belongs to.
         /// </summary>
         [Required(ErrorMessage = "Subject name is required.")]
-        public required string Subject { get; set; }
+        public string Subject { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Subject Id is required.")]
-        public required int SubjectId { get; set; }
+        public int SubjectId { get; set; }
 
         /// <summary>
         /// ID of the Teacher, who created the question.

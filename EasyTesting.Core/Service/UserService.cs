@@ -40,7 +40,7 @@ namespace EasyTesting.Core.Service
             return user;
         }
 
-        public async Task Login(HttpContext httpContext, string username, string password)
+        public async Task<string> Login(HttpContext httpContext, string username, string password)
         {
             var user = await _userRepository.FindUserByUsername(username);
             if (user == null)
@@ -52,24 +52,10 @@ namespace EasyTesting.Core.Service
             var correctPassword = _passwordHasher.VerifyPassword(user.PasswordHash, password);
             if (!correctPassword)
             {
-                _logger.LogError($"Password is incorect");
-                throw new UnauthorizedAccessException("Password is incorect");
+                _logger.LogError($"Password is incorrect");
+                throw new UnauthorizedAccessException("Password is incorrect");
             }
-            var token = _tokenGenerator.GenerateJwtToken(user);
-
-            httpContext.Response.Cookies.Append(TokenService.AuthTokenKey, token, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddDays(7)
-            });
-        }
-
-        public Task Logout(HttpContext httpContext)
-        {
-            httpContext.Response.Cookies.Delete("AuthToken");
-            return Task.CompletedTask;
+            return _tokenGenerator.GenerateJwtToken(user);
         }
 
         public async Task<List<User>> GetAllAsync()

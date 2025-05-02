@@ -23,7 +23,7 @@ namespace EasyTesting.Core.Models.DTO
         /// </summary>
         [Required(ErrorMessage = "Subject name is required.")]
         [MaxLength(100, ErrorMessage = "Subject name cannot exceed 100 characters.")]
-        public required string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Identifier of the teacher who owns the subject.

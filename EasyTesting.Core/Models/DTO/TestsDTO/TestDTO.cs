@@ -52,8 +52,7 @@ namespace EasyTesting.Core.Models.DTO
         /// <summary>
         /// List of questions included in the test.
         /// </summary>
-        [Required(ErrorMessage = "List of questions is required.")]
-        public required List<QuestionDTO> Questions { get; set; }
+        public List<QuestionDTO> Questions { get; set; } = new();
 
         /// <summary>
         /// Maps a Test entity to its corresponding DTO.
@@ -69,8 +68,7 @@ namespace EasyTesting.Core.Models.DTO
                 QuestionsCount = test.Questions.Count,
                 Subject = test.Subject?.Name ?? string.Empty,
                 SubjectId = test.SubjectId,
-                TeacherId = test.TeacherId,
-                Questions = test.Questions.Select(QuestionDTO.toDTO).ToList()
+                TeacherId = test.TeacherId
             };
         }
     }

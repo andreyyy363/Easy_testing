@@ -7,8 +7,7 @@ namespace EasyTesting.Core.Service
     public interface IUserService
     {
         Task<User> Register(UserCreateDTO userCreateDTO);
-        Task Login(HttpContext httpContext, string username, string password);
-        Task Logout(HttpContext httpContext);
+        Task<string> Login(HttpContext httpContext, string username, string password);
         Task<User?> FindUserByIdAsync(int userId);
         Task<List<User>> GetAllAsync();
         Task<User> UpdateUserAsync(UserUpdateDTO userUpdateDTO, User user);

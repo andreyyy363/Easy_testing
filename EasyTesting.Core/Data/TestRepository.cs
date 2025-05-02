@@ -59,7 +59,6 @@ namespace EasyTesting.Core.Data
         public async Task<IEnumerable<Test>> GetTestsBySubjectIdAsync(int teacherId, int subjectId)
         {
             return await _context.Tests
-                .Include(t => t.Questions).ThenInclude(q => q.AnswerOptions).AsSplitQuery()
                 .Include(t => t.Subject)
                 .Where(t => t.SubjectId == subjectId && t.TeacherId == teacherId)
                 .AsSplitQuery()
