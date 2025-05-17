@@ -1,4 +1,5 @@
 ﻿using EasyTesting.Core.Models.Entity;
+using EasyTesting.Core.Models.Filter;
 using Microsoft.EntityFrameworkCore;
 
 namespace EasyTesting.Core.Data
@@ -46,23 +47,20 @@ namespace EasyTesting.Core.Data
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        public async Task<IEnumerable<Test>> GetAllTestAsync(int teacherId)
+        public async Task<(IEnumerable<Test>, int Total)> GetAllTestAsync(QueryParameters parameters, int teacherId)
         {
-            return await _context.Tests
-                .Include(t => t.Questions).ThenInclude(q => q.AnswerOptions)
-                .Include(t => t.Subject)
-                .Where(t => t.TeacherId == teacherId)
-                .AsSplitQuery()
-                .ToListAsync();
+            var query = _context.Tests.Where(t => t.TeacherId == teacherId);
+            var total = await query.CountAsync();
+            return (await query.Include(t => t.Questions).ThenInclude(q => q.AnswerOptions)
+                               .Include(t => t.Subject).ToListAsync(), total);
         }
 
-        public async Task<IEnumerable<Test>> GetTestsBySubjectIdAsync(int teacherId, int subjectId)
+        public async Task<(IEnumerable<Test>, int Total)> GetTestsBySubjectIdAsync(QueryParameters parameters, int teacherId, int subjectId)
         {
-            return await _context.Tests
-                .Include(t => t.Subject)
-                .Where(t => t.SubjectId == subjectId && t.TeacherId == teacherId)
-                .AsSplitQuery()
-                .ToListAsync();
+            var query = _context.Tests.Where(t => t.SubjectId == subjectId && t.TeacherId == teacherId);
+            var total = await query.CountAsync();
+            return (await query.Include(t => t.Subject).AsSplitQuery().ToListAsync(), total);
         }
+
     }
 }

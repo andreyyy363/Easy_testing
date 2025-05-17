@@ -1,6 +1,4 @@
-﻿using Azure.Core;
-using EasyTesting.Core.Models.Entity;
-using Microsoft.AspNetCore.Http;
+﻿using EasyTesting.Core.Models.Entity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -20,7 +18,7 @@ namespace EasyTesting.Core.Service
             _config = config;
         }
 
-        public string GenerateJwtToken(User user)
+        public (string token, string expires) GenerateJwtToken(User user)
         {
             var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]!);
             var claims = new[]
@@ -40,11 +38,13 @@ namespace EasyTesting.Core.Service
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Issuer"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(7),
+                expires: DateTime.UtcNow.AddDays(1),
                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
             );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new (
+                new JwtSecurityTokenHandler().WriteToken(token), 
+                token.ValidTo.ToString("yyyy-MM-ddTHH:mm:ssZ") );
         }
 
         public int? GetUserIdFromToken(ClaimsPrincipal user)

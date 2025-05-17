@@ -1,6 +1,7 @@
 ﻿using EasyTesting.Core.Data;
 using EasyTesting.Core.Models.DTO;
 using EasyTesting.Core.Models.Entity;
+using EasyTesting.Core.Models.Filter;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -25,7 +26,7 @@ namespace EasyTesting.Core.Service
             _logger = logger;          
         }
 
-        public async Task<User> Register(UserCreateDTO userCreateDTO)
+        public async Task<UserDTO> Register(UserCreateDTO userCreateDTO)
         {
             var user = await _userRepository.FindUserByEmail(userCreateDTO.Email);
             if (user != null)
@@ -37,10 +38,10 @@ namespace EasyTesting.Core.Service
             user = userCreateDTO.fromDtoWithHashedPassword(passwordHash);
             await _userRepository.AddUserAsync(user);
             
-            return user;
+            return UserDTO.toDTO(user);
         }
 
-        public async Task<string> Login(HttpContext httpContext, string username, string password)
+        public async Task<(string token, string expires)> Login(HttpContext httpContext, string username, string password)
         {
             var user = await _userRepository.FindUserByUsername(username);
             if (user == null)
@@ -58,9 +59,11 @@ namespace EasyTesting.Core.Service
             return _tokenGenerator.GenerateJwtToken(user);
         }
 
-        public async Task<List<User>> GetAllAsync()
+        public async Task<PagedResult<UserDTO>> GetAllAsync(QueryParameters parameters)
         {
-            return await _userRepository.GetAllUsersAsync();
+            (var data, var total) = await _userRepository.GetAllUsersAsync(parameters);
+            var users = data.Select(UserDTO.toDTO);
+            return PagedResult<UserDTO>.Create(users, total, parameters.skip, parameters.limit);
         }
 
         public async Task<User?> FindUserByIdAsync(int id)
@@ -68,11 +71,11 @@ namespace EasyTesting.Core.Service
             return await _userRepository.FindUserByIdAsync(id);
         }
 
-        public async Task<User> UpdateUserAsync(UserUpdateDTO userUpdateDTO, User user)
+        public async Task<UserDTO> UpdateUserAsync(UserUpdateDTO userUpdateDTO, User user)
         {        
             UpdateUser(userUpdateDTO, user);
             await _userRepository.UpdateUserAsync(user);
-            return user;
+            return UserDTO.toDTO(user);
         }
 
         public async Task DeleteUserAsync(int id)

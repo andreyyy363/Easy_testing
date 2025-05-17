@@ -1,5 +1,8 @@
 ﻿using EasyTesting.Core.Models.DTO;
+using EasyTesting.Core.Models.Entity;
+using EasyTesting.Core.Models.Filter;
 using EasyTesting.Core.Service;
+using EasyTesting.Core.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,18 +32,25 @@ namespace EasyTesting.Web.Controllers
         /// <summary>
         /// Retrieves all tests available to the current teacher.
         /// </summary>
+        /// <param name="parameters">Paging parameters.</param>
         /// <returns>List of all test DTOs associated with the authenticated teacher.</returns>
         /// <response code="200">Returns the list of tests.</response>
         /// <response code="401">If the user is not authenticated.</response>
         [HttpGet]
-        public async Task<IActionResult> GetAllTests()
+        public async Task<IActionResult> GetAllTests([FromQuery] QueryParameters parameters)
         {
             var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 
-            var tests = await _testService.GetAllTestAsync(teacherId.Value);
-            return Ok(tests.Select(TestDTO.toDTO).ToList());
+            var tests = await _testService.GetAllTestAsync(parameters, teacherId.Value);
+            var result = new ResultBuilder<TestDTO>()
+                .WithPagedResult(tests)
+                .WithStatusCode(StatusCodes.Status200OK)
+                .WithContentType("application/json")
+                .Build();
+
+            return result;
         }
 
         /// <summary>
@@ -63,7 +73,7 @@ namespace EasyTesting.Web.Controllers
             if (test == null)
                 return NotFound();
 
-            return Ok(TestDTO.toDTO(test));
+            return Ok(test);
         }
 
         /// <summary>
@@ -92,18 +102,25 @@ namespace EasyTesting.Web.Controllers
         /// Retrieves all tests for a specified subject.
         /// </summary>
         /// <param name="id">The ID of the subject.</param>
+        /// <param name="parameters">Paging parameters.</param>
         /// <returns>List of tests for the subject.</returns>
         /// <response code="200">Returns the list of tests for the subject.</response>
         /// <response code="401">If the user is not authenticated.</response>
         [HttpGet("subject/{id}")]
-        public async Task<IActionResult> GetTestsBySubject(int id)
+        public async Task<IActionResult> GetTestsBySubject(int id, [FromQuery] QueryParameters parameters)
         {
             var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 
-            var tests = await _testService.GetTestsBySubjectIdAsync(teacherId.Value, id);
-            return Ok(tests.Select(TestDTO.toDTO).ToList());
+            var tests = await _testService.GetTestsBySubjectIdAsync(parameters, teacherId.Value, id);
+            var result = new ResultBuilder<TestDTO>()
+                .WithPagedResult(tests)
+                .WithStatusCode(StatusCodes.Status200OK)
+                .WithContentType("application/json")
+                .Build();
+
+            return result;
         }
 
         /// <summary>

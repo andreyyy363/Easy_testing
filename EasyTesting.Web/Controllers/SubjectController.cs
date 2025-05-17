@@ -1,6 +1,8 @@
 ﻿using EasyTesting.Core.Models.DTO;
 using EasyTesting.Core.Models.Entity;
+using EasyTesting.Core.Models.Filter;
 using EasyTesting.Core.Service;
+using EasyTesting.Core.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,20 +33,27 @@ namespace EasyTesting.Web.Controllers
         /// <summary>
         /// Retrieves all subjects associated with the currently authenticated teacher.
         /// </summary>
+        /// <param name="parameters">Paging parameters.</param>
         /// <returns>
         /// 200 OK with a list of subject DTOs, or 401 Unauthorized if not authenticated.
         /// </returns>
         /// <response code="200">Returns a list of subjects.</response>
         /// <response code="401">If the user is not authenticated.</response>
         [HttpGet]
-        public async Task<IActionResult> GetAllSubjects()
+        public async Task<IActionResult> GetAllSubjects([FromQuery] QueryParameters parameters)
         {
             var teacherId = GetTeacherId();
             if (teacherId == null)
                 return Unauthorized();
 
-            var subjects = await _subjectService.GetAllSubjectsAsync(teacherId.Value);
-            return Ok(subjects.Select(SubjectDTO.toDTO).ToList());
+            var subjects = await _subjectService.GetAllSubjectsAsync(parameters, teacherId.Value);
+            var result = new ResultBuilder<SubjectDTO>()
+                .WithPagedResult(subjects)
+                .WithStatusCode(StatusCodes.Status200OK)
+                .WithContentType("application/json")
+                .Build();
+
+            return result;
         }
 
         /// <summary>
@@ -72,7 +81,7 @@ namespace EasyTesting.Web.Controllers
                 return NotFound();
             }
 
-            return Ok(SubjectDTO.toDTO(subject));
+            return Ok(subject);
         }
 
         /// <summary>

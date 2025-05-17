@@ -38,7 +38,7 @@ namespace EasyTesting.Web.Controllers
         public async Task<IActionResult> Register([FromForm] UserCreateDTO userCreateDTO)
         {
             var user = await _userService.Register(userCreateDTO);
-            return Ok(UserDTO.toDTO(user));
+            return Ok(user);
         }
 
         /// <summary>
@@ -54,12 +54,12 @@ namespace EasyTesting.Web.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromForm] UserLoginDTO userLoginDTO)
         {
-            var token = await _userService.Login(HttpContext, userLoginDTO.Username, userLoginDTO.Password);
+            (var token, var expires) = await _userService.Login(HttpContext, userLoginDTO.Username, userLoginDTO.Password);
             return Ok(new
             {
                 access_token = token,
                 token_type = TokenService.Bearer,
-                expiration_date = DateTime.UtcNow.AddDays(7).ToString("yyyy-MM-ddTHH:mm:ssZ")
+                expiration_date = expires
             });
         }
     }

@@ -1,6 +1,7 @@
 ﻿using EasyTesting.Core.Data;
 using EasyTesting.Core.Models.DTO;
 using EasyTesting.Core.Models.Entity;
+using EasyTesting.Core.Models.Filter;
 
 namespace EasyTesting.Core.Service
 {
@@ -18,14 +19,20 @@ namespace EasyTesting.Core.Service
             await _subjectRepository.AddSubjectAsync(subject);
         }
 
-        public Task<Subject?> FindSubjectByIdAsync(int teacherId, int id)
+        public async Task<SubjectDTO?> FindSubjectByIdAsync(int teacherId, int id)
         {
-            return _subjectRepository.FindSubjectByIdAsync(teacherId, id);
+            var subject = await _subjectRepository.FindSubjectByIdAsync(teacherId, id);
+            if (subject == null)
+                return null;
+
+            return SubjectDTO.toDTO(subject);
         }
 
-        public Task<IEnumerable<Subject>> GetAllSubjectsAsync(int teacherId)
+        public async Task<PagedResult<SubjectDTO>> GetAllSubjectsAsync(QueryParameters parameters, int teacherId)
         {
-            return _subjectRepository.GetAllSubjectsAsync(teacherId);
+            (var data, var total) = await _subjectRepository.GetAllSubjectsAsync(parameters, teacherId);
+            var subjects = data.Select(SubjectDTO.toDTO);
+            return PagedResult<SubjectDTO>.Create(subjects, total, parameters.skip, parameters.limit);
         }
 
         public async Task DeleteSubjectAsync(int teacherId, int id)

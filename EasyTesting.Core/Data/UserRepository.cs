@@ -1,5 +1,7 @@
 ﻿using EasyTesting.Core.Data;
 using EasyTesting.Core.Models.Entity;
+using EasyTesting.Core.Models.Filter;
+using EasyTesting.Core.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace EasyTesting.Core.Data
@@ -50,9 +52,10 @@ namespace EasyTesting.Core.Data
             }
         }
 
-        public async Task<List<User>> GetAllUsersAsync()
+        public async Task<(IEnumerable<User>, int Total)> GetAllUsersAsync(QueryParameters parameters)
         {
-            return await _context.Users.ToListAsync();
+            int total = await _context.Users.CountAsync();
+            return (await _context.Users.ApplyPaging(parameters).ToListAsync(), total);
         }
 
     }

@@ -52,7 +52,12 @@ namespace EasyTesting.Core.Models.DTO
         /// <summary>
         /// List of questions included in the test.
         /// </summary>
-        public List<QuestionDTO> Questions { get; set; } = new();
+        //public List<QuestionDTO> Questions { get; set; } = new();
+
+        /// <summary>
+        /// List of questions included in the test.
+        /// </summary>
+        public required string TestXml { get; set; }
 
         /// <summary>
         /// Maps a Test entity to its corresponding DTO.
@@ -68,7 +73,8 @@ namespace EasyTesting.Core.Models.DTO
                 QuestionsCount = test.Questions.Count,
                 Subject = test.Subject?.Name ?? string.Empty,
                 SubjectId = test.SubjectId,
-                TeacherId = test.TeacherId
+                TeacherId = test.TeacherId,
+                TestXml = test.TestXml
             };
         }
     }
