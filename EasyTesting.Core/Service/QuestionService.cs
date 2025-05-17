@@ -1,6 +1,7 @@
 ﻿using EasyTesting.Core.Data;
 using EasyTesting.Core.Models.DTO;
 using EasyTesting.Core.Models.Entity;
+using EasyTesting.Core.Models.Filter;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -17,19 +18,27 @@ namespace EasyTesting.Core.Service
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<IEnumerable<Question>> GetAllQuestionsAsync(int teacherId)
+        public async Task<PagedResult<QuestionDTO>> GetAllQuestionsAsync(QueryParameters parameters, int teacherId)
         {
-            return await _questionRepository.GetAllQuestionsAsync(teacherId);
+            (var data, var total) = await _questionRepository.GetAllQuestionsAsync(parameters, teacherId);
+            var questions = data.Select(QuestionDTO.toDTO);
+            return PagedResult<QuestionDTO>.Create(questions, total, parameters.skip, parameters.limit);
         }
 
-        public async Task<Question?> FindQuestionByIdAsync(int teacherId, int id)
+        public async Task<QuestionDTO?> FindQuestionByIdAsync(int teacherId, int id)
         {
-            return await _questionRepository.FindQuestionByIdAsync(teacherId, id);
+            var question = await _questionRepository.FindQuestionByIdAsync(teacherId, id);
+            if (question == null)
+                return null;
+
+            return QuestionDTO.toDTO(question);
         }
 
-        public async Task<IEnumerable<Question>> GetQuestionsBySubjectIdAsync(int teacherId, int subjectId)
+        public async Task<PagedResult<QuestionDTO>> GetQuestionsBySubjectIdAsync(QueryParameters parameters, int teacherId, int subjectId)
         {
-            return await _questionRepository.GetQuestionsBySubjectIdAsync(teacherId, subjectId);
+            (var data, var total) = await _questionRepository.GetQuestionsBySubjectIdAsync(parameters, teacherId, subjectId);
+            var questions = data.Select(QuestionDTO.toDTO);
+            return PagedResult<QuestionDTO>.Create(questions, total, parameters.skip, parameters.limit);
         }
 
         public async Task AddQuestionAsync(int teacherId, CreateQuestionDTO createQuestionDto)
@@ -38,7 +47,7 @@ namespace EasyTesting.Core.Service
             await _questionRepository.AddQuestionAsync(createQuestionDto.fromDTO());
         }
 
-        public async Task<Question> UpdateQuestionAsync(int teacherId, int id, UpdateQuestionDTO updateQuestionDto)
+        public async Task<QuestionDTO> UpdateQuestionAsync(int teacherId, int id, UpdateQuestionDTO updateQuestionDto)
         {
             var question = await _questionRepository.FindQuestionByIdAsync(teacherId, id);
             if (question == null)
@@ -56,7 +65,8 @@ namespace EasyTesting.Core.Service
                     IsCorrect = a.IsCorrect
                 }).ToList();
 
-            return await _questionRepository.UpdateQuestionAsync(question);
+            var updatedQuestion = await _questionRepository.UpdateQuestionAsync(question);
+            return QuestionDTO.toDTO(updatedQuestion);
         }
 
         public async Task DeleteQuestionAsync(int teacherId, int id)

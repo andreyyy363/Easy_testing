@@ -1,5 +1,7 @@
 ﻿using EasyTesting.Core.Models.DTO;
+using EasyTesting.Core.Models.Filter;
 using EasyTesting.Core.Service;
+using EasyTesting.Core.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,16 +32,22 @@ namespace EasyTesting.Web.Controllers
         /// <summary>
         /// Retrieves a list of all users.
         /// </summary>
+        /// <param name="parameters">Paging parameters.</param>
         /// <returns>
         /// 200 OK with a list of all user DTOs.
         /// </returns>
         /// <response code="200">Returns the list of users.</response>
         [HttpGet]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUsers([FromQuery] QueryParameters parameters)
         {
-            var users = await _userService.GetAllAsync();
-            var usersDto = users.Select(UserDTO.toDTO).ToList();
-            return Ok(usersDto);
+            var users = await _userService.GetAllAsync(parameters);
+            var result = new ResultBuilder<UserDTO>()
+                .WithPagedResult(users)
+                .WithStatusCode(StatusCodes.Status200OK)
+                .WithContentType("application/json")
+                .Build();
+
+            return result;
         }
 
         /// <summary>

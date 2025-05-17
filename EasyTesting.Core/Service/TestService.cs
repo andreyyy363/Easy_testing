@@ -1,9 +1,8 @@
 ﻿using EasyTesting.Core.Data;
 using EasyTesting.Core.Models.DTO;
 using EasyTesting.Core.Models.Entity;
-using EasyTesting.Core.Models.TestXmlModels;
+using EasyTesting.Core.Models.Filter;
 using Microsoft.Extensions.Logging;
-using System.Xml.Serialization;
 
 namespace EasyTesting.Core.Service
 {
@@ -90,19 +89,27 @@ namespace EasyTesting.Core.Service
             };
         }
 
-        public async Task<IEnumerable<Test>> GetAllTestAsync(int teacherId)
+        public async Task<PagedResult<TestDTO>> GetAllTestAsync(QueryParameters parameters, int teacherId)
         {
-            return await _testRepository.GetAllTestAsync(teacherId);
+            (var data, var total) = await _testRepository.GetAllTestAsync(parameters, teacherId);
+            var tests = data.Select(TestDTO.toDTO);
+            return PagedResult<TestDTO>.Create(tests, total, parameters.skip, parameters.limit);
         }
 
-        public async Task<IEnumerable<Test>> GetTestsBySubjectIdAsync(int teacherId, int subjectId)
+        public async Task<PagedResult<TestDTO>> GetTestsBySubjectIdAsync(QueryParameters parameters, int teacherId, int subjectId)
         {
-            return await _testRepository.GetTestsBySubjectIdAsync(teacherId, subjectId);
+            (var data, var total) = await _testRepository.GetTestsBySubjectIdAsync(parameters, teacherId, subjectId);
+            var tests = data.Select(TestDTO.toDTO);
+            return PagedResult<TestDTO>.Create(tests, total, parameters.skip, parameters.limit);
         }
 
-        public async Task<Test?> FindTestByIdAsync(int teacherId, int id)
+        public async Task<TestDTO?> FindTestByIdAsync(int teacherId, int id)
         {
-            return await _testRepository.FindTestByIdAsync(teacherId, id);
+           var test = await _testRepository.FindTestByIdAsync(teacherId, id);
+           if(test == null)
+               return null;
+
+           return TestDTO.toDTO(test);
         }
 
         public async Task DeleteTestAsync(int teacherId, int id)

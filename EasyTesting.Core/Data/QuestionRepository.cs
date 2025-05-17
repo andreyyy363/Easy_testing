@@ -1,6 +1,7 @@
 ﻿using EasyTesting.Core.Models.Entity;
+using EasyTesting.Core.Models.Filter;
+using EasyTesting.Core.Utils;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Quic;
 
 namespace EasyTesting.Core.Data
 {
@@ -25,6 +26,15 @@ namespace EasyTesting.Core.Data
                                            .FirstOrDefaultAsync(q => q.Id == id && q.CreatedById == teacherId);
         }
 
+        public async Task<(IEnumerable<Question>, int Total)> GetQuestionsBySubjectIdAsync(QueryParameters parameters, int teacherId, int subjectId)
+        {
+            var query = _context.Questions.Where(q => q.SubjectId == subjectId && q.CreatedById == teacherId);
+            var total = await query.CountAsync();
+            return (await query.Include(q => q.Subject).Include(q => q.AnswerOptions) 
+                                           .ApplyPaging(parameters)
+                                           .ToListAsync(), total);
+        }
+
         public async Task<IEnumerable<Question>> GetQuestionsBySubjectIdAsync(int teacherId, int subjectId)
         {
             return await _context.Questions.Include(q => q.Subject).Include(q => q.AnswerOptions)
@@ -32,11 +42,13 @@ namespace EasyTesting.Core.Data
                                            .ToListAsync();
         }
 
-        public async Task<IEnumerable<Question>> GetAllQuestionsAsync(int teacherId)
+        public async Task<(IEnumerable<Question>, int Total)> GetAllQuestionsAsync(QueryParameters parameters, int teacherId)
         {
-            return await _context.Questions.Include(q => q.Subject).Include(q => q.AnswerOptions)
-                                           .Where(q => q.CreatedById == teacherId)
-                                           .ToListAsync();
+            var query = _context.Questions.Where(q => q.CreatedById == teacherId);
+            var total = await query.CountAsync();
+            return (await query.Include(q => q.Subject).Include(q => q.AnswerOptions)     
+                                           .ApplyPaging(parameters)
+                                           .ToListAsync(), total);
         }
 
         public async Task<Question> UpdateQuestionAsync(Question question)

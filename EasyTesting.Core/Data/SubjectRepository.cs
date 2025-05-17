@@ -1,10 +1,7 @@
 ﻿using EasyTesting.Core.Models.Entity;
+using EasyTesting.Core.Models.Filter;
+using EasyTesting.Core.Utils;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EasyTesting.Core.Data
 {
@@ -28,9 +25,11 @@ namespace EasyTesting.Core.Data
             return await _context.Subjects.FirstOrDefaultAsync(s => s.Id == id && s.TeacherId == teacherId);
         }
 
-        public async Task<IEnumerable<Subject>> GetAllSubjectsAsync(int teacherId)
+        public async Task<(IEnumerable<Subject>, int Total)> GetAllSubjectsAsync(QueryParameters parameters, int teacherId)
         {
-            return await _context.Subjects.Where(s => s.TeacherId == teacherId).ToListAsync();
+            var query = _context.Subjects.Where(s => s.TeacherId == teacherId);
+            var total = await query.CountAsync();
+            return (await query.ApplyPaging(parameters).ToListAsync(), total);
         }
 
         public async Task DeleteSubjectAsync(int teacherId, int id)

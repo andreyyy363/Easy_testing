@@ -55,7 +55,7 @@ builder.Services.AddSwaggerGen(options =>
         Description = "Easy Testing API"
     });
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "EasyTestingApi.xml"));
-    #region AddSecurityDefinition if returning token
+    #region AddSecurityDefinition
 
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -115,7 +115,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+//SwaggerUI in dev mode only
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -136,8 +136,6 @@ app.UseAuthorization();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSerilogRequestLogging();
-
-//app.MapFallbackToPage("/Login");
 
 app.MapControllers();
 //app.MapRazorPages();
