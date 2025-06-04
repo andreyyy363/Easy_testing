@@ -1,6 +1,6 @@
 ﻿using EasyTesting.Core.Models.DTO;
 using EasyTesting.Core.Service;
-using Microsoft.AspNetCore.Http;
+using EasyTesting.Core.Utils;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EasyTesting.Web.Controllers
@@ -35,6 +35,7 @@ namespace EasyTesting.Web.Controllers
         /// <response code="200">User was successfully registered.</response>
         /// <response code="400">If the registration data is invalid or registration failed.</response>
         [HttpPost("register")]
+        [DevOnly]
         public async Task<IActionResult> Register([FromForm] UserCreateDTO userCreateDTO)
         {
             var user = await _userService.Register(userCreateDTO);

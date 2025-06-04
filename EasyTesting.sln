@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyTesting.Web", "EasyTest
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyTesting.Core", "EasyTesting.Core\EasyTesting.Core.csproj", "{F50F7B6A-8807-42A6-8848-816A3E0D2BF5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyTesting.Tests", "EasyTesting.Tests\EasyTesting.Tests.csproj", "{94A42285-03BD-408E-B7E6-4D31BBF4819C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{F50F7B6A-8807-42A6-8848-816A3E0D2BF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F50F7B6A-8807-42A6-8848-816A3E0D2BF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F50F7B6A-8807-42A6-8848-816A3E0D2BF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94A42285-03BD-408E-B7E6-4D31BBF4819C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94A42285-03BD-408E-B7E6-4D31BBF4819C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94A42285-03BD-408E-B7E6-4D31BBF4819C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94A42285-03BD-408E-B7E6-4D31BBF4819C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

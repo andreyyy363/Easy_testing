@@ -89,8 +89,8 @@ namespace EasyTesting.Web.Controllers
         {
             var teacherId = GetTeacherId();
             if (teacherId == null)
-
                 return Unauthorized();
+
             var test = await _testService.FindTestByIdAsync(teacherId.Value, id);
             if (test == null)
                 return NotFound();

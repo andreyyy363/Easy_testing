@@ -33,7 +33,7 @@
             {
                 _logger.LogError(ex.Message);
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                await context.Response.WriteAsJsonAsync(new { error = "Internal Server Error" });
+                await context.Response.WriteAsJsonAsync(new { error = $"Internal Server Error: {ex.Message}" });
             }
         }
     }

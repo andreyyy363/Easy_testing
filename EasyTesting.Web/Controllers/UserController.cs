@@ -38,6 +38,7 @@ namespace EasyTesting.Web.Controllers
         /// </returns>
         /// <response code="200">Returns the list of users.</response>
         [HttpGet]
+        [DevOnly]
         public async Task<IActionResult> GetUsers([FromQuery] QueryParameters parameters)
         {
             var users = await _userService.GetAllAsync(parameters);
@@ -84,6 +85,7 @@ namespace EasyTesting.Web.Controllers
         /// <response code="401">If the user is not authenticated.</response>
         /// <response code="404">If the user does not exist.</response>
         [HttpPut]
+        [DevOnly]
         public async Task<IActionResult> UpdateUser([FromForm] UserUpdateDTO userUpdateDTO)
         {
             var userId = GetTeacherId();
@@ -107,6 +109,7 @@ namespace EasyTesting.Web.Controllers
         /// <response code="204">User was successfully deleted.</response>
         /// <response code="401">If the user is not authenticated.</response>
         [HttpDelete]
+        [DevOnly]
         public async Task<IActionResult> DeleteUser()
         {
             var userId = GetTeacherId();
